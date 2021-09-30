@@ -28,7 +28,7 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity {
 
     private String key = "wEOWhOEV95XFLOJ4fqYdWXwJMODD6Ze7R8%2FQDUZdmBrHnlVU8ER0P2YenWEkb4imfh7IvqniyzIfj%2BEZp%2BnG%2Fw%3D%3D";
-    private String urlAddress = "https://api.odcloud.kr/api/gov24/v1/serviceList?page=1&perPage=10&serviceKey=wEOWhOEV95XFLOJ4fqYdWXwJMODD6Ze7R8%2FQDUZdmBrHnlVU8ER0P2YenWEkb4imfh7IvqniyzIfj%2BEZp%2BnG%2Fw%3D%3D";
+    private String urlAddress = "https://api.odcloud.kr/api/gov24/v1/serviceDetail?page=1&perPage=20&serviceKey=wEOWhOEV95XFLOJ4fqYdWXwJMODD6Ze7R8%2FQDUZdmBrHnlVU8ER0P2YenWEkb4imfh7IvqniyzIfj%2BEZp%2BnG%2Fw%3D%3D";
     private ListView listView;
     private Button btnData;
     ArrayAdapter adapter;
@@ -56,15 +56,6 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         items.clear();
-
-//                        Date date = new Date();
-//                        date.setTime(date.getTime()-(1000*60*60*24));   // 현재의 날짜에서 1일을 뺀 날짜
-//
-//                        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-//                        String dateStr = sdf.format(date);  // 20210316
-
-//                        String urlAddress = address + "?key=" + key + "&targetDt=" + dateStr;
-
                         try {
                             URL url = new URL(urlAddress);
 
@@ -83,18 +74,17 @@ public class MainActivity extends AppCompatActivity {
 
                             // jsonData를 먼저 JSONObject 형태로 바꾼다.
                             JSONObject obj = new JSONObject(jsonData);
-                            // obj의 "boxOfficeResult"의 JSONObject를 추출
-//                            JSONObject boxOfficeResult = (JSONObject) obj.get("boxOfficeResult");
-                            // boxOfficeResult의 JSONObject에서 "dailyBoxOfficeList"의 JSONArray 추출
-                            JSONArray dailyBoxOfficeList = (JSONArray) obj.get("data");
+                            // obj의 "serviceList"의 JSONObject를 추출
+                            JSONArray serviceList = (JSONArray) obj.get("data");
 
-                            for (int i = 0; i < dailyBoxOfficeList.length(); i++) {
-
-                                JSONObject temp = dailyBoxOfficeList.getJSONObject(i);
-
-                                String movieNm = temp.getString("서비스명");
-
-                                items.add(movieNm);
+                            for (int i = 0; i < serviceList.length(); i++) {
+                                JSONObject temp = serviceList.getJSONObject(i);
+                                String serviceName = temp.getString("서비스명");
+                                String serviceCon = temp.getString("지원내용");
+                                String servicePurpose = temp.getString("서비스목적");
+                                String who = temp.getString("지원대상");
+                                String serviceCh = temp.getString("선정기준");
+                                items.add(serviceName+"\n"+serviceCon+"\n"+servicePurpose+"\n"+who+"\n"+serviceCh);
                             }
 
                             runOnUiThread(new Runnable() {
