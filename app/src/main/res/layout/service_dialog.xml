@@ -29,7 +29,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-black"
                     android:text="서비스 이름"
-                    android:textColor="#628364"
+                    android:textColor="#AD044263"
                     android:textSize="20sp" />
 
                 <View

@@ -14,7 +14,7 @@
         android:layout_weight="1"
         android:fontFamily="sans-serif-black"
         android:text="서비스명"
-        android:textColor="#628364"
+        android:textColor="#AD044263"
         android:textSize="18sp" />
 
     <LinearLayout

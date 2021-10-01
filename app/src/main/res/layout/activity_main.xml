@@ -14,7 +14,7 @@
         android:fontFamily="sans-serif-black"
         android:gravity="center"
         android:text="공공서비스 목록"
-        android:textColor="#346304"
+        android:textColor="#AD044263"
         android:textSize="36sp"></TextView>
 
 
