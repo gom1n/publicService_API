@@ -1,16 +1,20 @@
 package com.example.myapplication2;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,96 +33,175 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    private int page;
     private String key = "wEOWhOEV95XFLOJ4fqYdWXwJMODD6Ze7R8%2FQDUZdmBrHnlVU8ER0P2YenWEkb4imfh7IvqniyzIfj%2BEZp%2BnG%2Fw%3D%3D";
-    private String urlAddress = "https://api.odcloud.kr/api/gov24/v1/serviceList?page=1&perPage=10&serviceKey=wEOWhOEV95XFLOJ4fqYdWXwJMODD6Ze7R8%2FQDUZdmBrHnlVU8ER0P2YenWEkb4imfh7IvqniyzIfj%2BEZp%2BnG%2Fw%3D%3D";
-    private Button btnData;
 
     ArrayList<ServiceData> serviceList = new ArrayList<ServiceData>();
 //    private ArrayList<PlaceData> arraylist;
     ServiceAdapter serviceAdapter;
 
-
+    Dialog dialog;
+    ImageView prev;
+    ImageView next;
+    TextView pageN;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //상단바 없애기
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.hide();
+
+        //페이지 구현
+        page = 1;
+        pageN = (TextView) findViewById(R.id.pageN);
+        pageN.setText(page+"");
+        prev = (ImageView)findViewById(R.id.prev);
+        next = (ImageView)findViewById(R.id.next);
+        prev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(page == 1) return;
+                else {
+                    serviceList.clear();
+                    page--;
+                    pageN.setText(page+"");
+                    getJSON(page);
+                    serviceAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                serviceList.clear();
+                page++;
+                pageN.setText(page+"");
+                getJSON(page);
+                serviceAdapter.notifyDataSetChanged();
+            }
+        });
+
+        //서비스 목록 리스트뷰
         ListView listView = (ListView) findViewById(R.id.listView);
         serviceAdapter = new ServiceAdapter(this.getApplicationContext(), serviceList);
         listView.setAdapter(serviceAdapter);
 
-        btnData = (Button) findViewById(R.id.btnData);
+        //데이터 불러오기
+        getJSON(1);
 
-        btnData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        serviceList.clear();
-                        try {
-                            URL url = new URL(urlAddress);
+        //다이얼로그 띄우기
+        dialog = new Dialog(MainActivity.this);       // Dialog 초기화
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); // 타이틀 제거
+        dialog.setContentView(R.layout.service_dialog);             // xml 레이아웃 파일과 연결
 
-                            InputStream is = url.openStream();
-                            InputStreamReader isr = new InputStreamReader(is);
-                            BufferedReader reader = new BufferedReader(isr);
-
-                            StringBuffer buffer = new StringBuffer();
-                            String line = reader.readLine();
-                            while (line != null) {
-                                buffer.append(line + "\n");
-                                line = reader.readLine();
-                            }
-
-                            String jsonData = buffer.toString();
-
-                            // jsonData를 먼저 JSONObject 형태로 바꾼다.
-                            JSONObject obj = new JSONObject(jsonData);
-                            // obj의 "serviceList"의 JSONObject를 추출
-                            JSONArray serviceArray = (JSONArray) obj.get("data");
-
-                            for (int i = 0; i < serviceArray.length(); i++) {
-                                JSONObject temp = serviceArray.getJSONObject(i);
-                                String serviceName = temp.getString("서비스명");
-                                String serviceID = temp.getString("서비스ID");
-                                String servicePurpose = temp.getString("서비스목적");
-                                String target = temp.getString("지원대상");
-                                String content = temp.getString("지원내용");
-                                String select = temp.getString("선정기준");
-                                String surl = temp.getString("상세조회URL");
-                                String serviceDepart = temp.getString("부서명");
-
-                                serviceList.add(new ServiceData(serviceName, serviceID, servicePurpose, target, content, select, surl, serviceDepart));
-                            }
-
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    serviceAdapter.notifyDataSetChanged();
-                                }
-                            });
-
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }.start();
-            }
-        });
-        // 리스트뷰의 아이템 클릭 이벤트 > 토스트 메시지 띄우기
+        // 리스트뷰의 아이템 클릭 이벤트
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                String data = (String) parent.getItemAtPosition(position);
-//                Toast.makeText(MainActivity.this, data, Toast.LENGTH_SHORT).show();
+                ServiceData service = (ServiceData) parent.getAdapter().getItem(position);
+                showDialog(service);
             }
         });
 
+    }
+    // dialog 디자인하는 함수
+    public void showDialog(ServiceData data){
+        dialog.show(); // 다이얼로그 띄우기
+
+        TextView sN = dialog.findViewById(R.id.sN_dialog);
+        TextView sD = dialog.findViewById(R.id.sD_dialog);
+        TextView sID = dialog.findViewById(R.id.sID_dialog);
+        TextView sT = dialog.findViewById(R.id.sT_dialog);
+        TextView sP = dialog.findViewById(R.id.sP_dialog);
+        TextView sC = dialog.findViewById(R.id.sC_dialog);
+        TextView sS = dialog.findViewById(R.id.sS_dialog);
+        TextView sU = dialog.findViewById(R.id.sU_dialog);
+
+        sN.setText(data.getServiceName());
+        sD.setText(data.getServiceDepart());
+        sID.setText(data.getServiceID());
+        sT.setText(data.getTarget());
+        sP.setText(data.getServicePurpose());
+        sC.setText(data.getContent());
+        sS.setText(data.getSelect());
+        sU.setText(data.getUrl());
+
+        dialog.findViewById(R.id.goURL).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        // 엑스 버튼
+        dialog.findViewById(R.id.close_dialog).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss(); // 다이얼로그 닫기
+            }
+        });
+    }
+    //JSON 파싱
+    void getJSON(int page) {
+        new Thread() {
+            @Override
+            public void run() {
+                serviceList.clear();
+                try {
+                    String urlAddress = "https://api.odcloud.kr/api/gov24/v1/serviceList?page="+page+"&perPage=10&serviceKey=wEOWhOEV95XFLOJ4fqYdWXwJMODD6Ze7R8%2FQDUZdmBrHnlVU8ER0P2YenWEkb4imfh7IvqniyzIfj%2BEZp%2BnG%2Fw%3D%3D";
+                    URL url = new URL(urlAddress);
+
+                    InputStream is = url.openStream();
+                    InputStreamReader isr = new InputStreamReader(is);
+                    BufferedReader reader = new BufferedReader(isr);
+
+                    StringBuffer buffer = new StringBuffer();
+                    String line = reader.readLine();
+                    while (line != null) {
+                        buffer.append(line + "\n");
+                        line = reader.readLine();
+                    }
+
+                    String jsonData = buffer.toString();
+
+                    // jsonData를 먼저 JSONObject 형태로 바꾼다.
+                    JSONObject obj = new JSONObject(jsonData);
+                    // obj의 "serviceList"의 JSONObject를 추출
+                    JSONArray serviceArray = (JSONArray) obj.get("data");
+
+                    for (int i = 0; i < serviceArray.length(); i++) {
+                        JSONObject temp = serviceArray.getJSONObject(i);
+                        String serviceName = temp.getString("서비스명");
+                        String serviceID = temp.getString("서비스ID");
+                        String servicePurpose = temp.getString("서비스목적");
+                        String target = temp.getString("지원대상");
+                        String content = temp.getString("지원내용");
+                        String select = temp.getString("선정기준");
+                        String surl = temp.getString("상세조회URL");
+                        String serviceDepart = temp.getString("부서명");
+
+                        serviceList.add(new ServiceData(serviceName, serviceID, servicePurpose, target, content, select, surl, serviceDepart));
+                    }
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            serviceAdapter.notifyDataSetChanged();
+                        }
+                    });
+
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
     }
 }
 
