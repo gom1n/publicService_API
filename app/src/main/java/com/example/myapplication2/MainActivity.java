@@ -36,7 +36,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private int page;
-    private String key = "wEOWhOEV95XFLOJ4fqYdWXwJMODD6Ze7R8%2FQDUZdmBrHnlVU8ER0P2YenWEkb4imfh7IvqniyzIfj%2BEZp%2BnG%2Fw%3D%3D";
+    private String key = "인증키 쓰세요";
 
     ArrayList<ServiceData> serviceList = new ArrayList<ServiceData>();
 //    private ArrayList<PlaceData> arraylist;
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 serviceList.clear();
                 try {
-                    String urlAddress = "https://api.odcloud.kr/api/gov24/v1/serviceList?page="+page+"&perPage=10&serviceKey=wEOWhOEV95XFLOJ4fqYdWXwJMODD6Ze7R8%2FQDUZdmBrHnlVU8ER0P2YenWEkb4imfh7IvqniyzIfj%2BEZp%2BnG%2Fw%3D%3D";
+                    String urlAddress = "https://api.odcloud.kr/api/gov24/v1/serviceList?page="+page+"&perPage=10&serviceKey=인증키입니다.";
                     URL url = new URL(urlAddress);
 
                     InputStream is = url.openStream();
@@ -284,11 +284,6 @@ class ServiceAdapter extends BaseAdapter {
     private ArrayList<ServiceData> data;
     private TextView sercviceNameTextView;
     private TextView serviceIDTextView;
-    private TextView servicePurposeTextView;
-    private TextView targetTextView;
-    private TextView contentTextView;
-    private TextView selectTextView;
-    private TextView urlTextView;
     private TextView serviceDepartTextView;
 
 
@@ -323,16 +318,6 @@ class ServiceAdapter extends BaseAdapter {
         sercviceNameTextView.setText(data.get(position).getServiceName());
         serviceIDTextView = (TextView) view.findViewById(R.id.sID);
         serviceIDTextView.setText(data.get(position).getServiceID());
-//        servicePurposeTextView = (TextView) view.findViewById(R.id.tel);
-//        servicePurposeTextView.setText(data.get(position).getServicePurpose());
-//        targetTextView = (TextView) view.findViewById(R.id.tel);
-//        targetTextView.setText(data.get(position).getTarget());
-//        contentTextView = (TextView) view.findViewById(R.id.tel);
-//        contentTextView.setText(data.get(position).getContent());
-//        selectTextView = (TextView) view.findViewById(R.id.tel);
-//        selectTextView.setText(data.get(position).getSelect());
-//        urlTextView = (TextView) view.findViewById(R.id.tel);
-//        urlTextView.setText(data.get(position).getUrl());
         serviceDepartTextView = (TextView) view.findViewById(R.id.sD);
         serviceDepartTextView.setText(data.get(position).getServiceDepart());
 
